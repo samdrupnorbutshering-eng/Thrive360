@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Thrive 360 – Wellbeing Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Leaflet CSS -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f6f8;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    p {
+        text-align: center;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 30px;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #555;
+        border-bottom: 3px solid transparent;
+    }
+
+    .tab.active {
+        color: #2f80ed;
+        border-bottom: 3px solid #2f80ed;
+    }
+
+    .tab-content {
+        display: none;
+        margin-top: 25px;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    label {
+        display: block;
+        margin-top: 15px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    textarea, select, input {
+        width: 100%;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+    }
+
+    textarea {
+        min-height: 100px;
+    }
+
+    button {
+        margin-top: 20px;
+        padding: 12px;
+        width: 100%;
+        background-color: #2f80ed;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #2563c9;
+    }
+
+    .success {
+        margin-top: 15px;
+        color: green;
+        font-weight: bold;
+        display: none;
+        text-align: center;
+    }
+
+    .note {
+        margin-top: 20px;
+        font-size: 12px;
+        color: #777;
+        text-align: center;
+    }
+
+    #map {
+        height: 400px;
+        border-radius: 6px;
+        margin-top: 15px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Thrive 360</h1>
+    <p>A safe and confidential space for your mental wellbeing at workplace</p>
+
+    <div class="tabs">
+        <div class="tab active" onclick="openTab('feedback')">Feedback</div>
+        <div class="tab" onclick="openTab('counsellor')">Counsellor</div>
+        <div class="tab" onclick="openTab('peer')">Peer Support</div>
+        <div class="tab" onclick="openTab('leave')">Wellbeing Leave</div>
+        <div class="tab" onclick="openTab('mapTab')">Wellbeing Map</div>
+    </div>
+
+    <!-- Feedback -->
+    <div id="feedback" class="tab-content active">
+        <label>Feedback Category</label>
+        <select>
+            <option>Mental Wellbeing</option>
+            <option>Workload & Stress</option>
+            <option>Work–Life Balance</option>
+            <option>Management & Communication</option>
+            <option>Career Growth</option>
+        </select>
+
+        <label>Your Feedback (Anonymous)</label>
+        <textarea placeholder="Share your thoughts freely..."></textarea>
+
+        <button onclick="submitForm(this)">Submit Feedback</button>
+        <div class="success">Thank you. Your feedback has been submitted.</div>
+    </div>
+
+    <!-- Counsellor -->
+    <div id="counsellor" class="tab-content">
+        <label>Support Area</label>
+        <select>
+            <option>Stress & Anxiety</option>
+            <option>Work Pressure</option>
+            <option>Family Concerns</option>
+            <option>General Mental Health</option>
+        </select>
+
+        <label>Message (Optional)</label>
+        <textarea placeholder="Briefly describe your concern..."></textarea>
+
+        <button onclick="submitForm(this)">Request Counsellor</button>
+        <div class="success">Your request has been sent confidentially.</div>
+    </div>
+
+    <!-- Peer -->
+    <div id="peer" class="tab-content">
+        <label>Choose Peer Support</label>
+        <select>
+            <option>Trained Peer Listener</option>
+            <option>Workplace Buddy</option>
+            <option>Support Circle</option>
+        </select>
+
+        <label>Message (Optional)</label>
+        <textarea placeholder="What would you like to talk about?"></textarea>
+
+        <button onclick="submitForm(this)">Request Peer Support</button>
+        <div class="success">Your peer support request has been sent.</div>
+    </div>
+
+    <!-- Leave -->
+    <div id="leave" class="tab-content">
+        <label>Type of Mental Wellbeing Leave</label>
+        <select>
+            <option>Single Day</option>
+            <option>Multiple Days</option>
+            <option>Flexible / Half Day</option>
+        </select>
+
+        <label>Preferred Start Date</label>
+        <input type="date">
+
+        <label>Preferred End Date (if applicable)</label>
+        <input type="date">
+
+        <label>Contact Preference</label>
+        <select>
+            <option>No Contact Required</option>
+            <option>Email Only</option>
+            <option>HR Follow-up</option>
+        </select>
+
+        <label>Additional Notes (Optional)</label>
+        <textarea placeholder="You may share details if you wish. This is optional."></textarea>
+
+        <button onclick="submitForm(this)">Submit Leave Request</button>
+        <div class="success">Your mental wellbeing leave request has been submitted confidentially.</div>
+    </div>
+
+    <!-- Map -->
+    <div id="mapTab" class="tab-content">
+        <p>
+            Explore nearby mental wellbeing services and recreational spaces
+            available for relaxation and support.
+        </p>
+        <div id="map"></div>
+    </div>
+
+    <div class="note">
+        This system is anonymous and designed to support your wellbeing without judgement.
+    </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+function openTab(tabId) {
+    const tabs = document.querySelectorAll('.tab');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => tab.classList.remove('active'));
+    contents.forEach(content => content.classList.remove('active'));
+
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+
+    if (tabId === 'mapTab') {
+        setTimeout(initMap, 200);
+    }
+}
+
+function submitForm(button) {
+    const success = button.nextElementSibling;
+    success.style.display = "block";
+}
+
+let mapInitialized = false;
+
+function initMap() {
+    if (mapInitialized) return;
+
+    const map = L.map('map').setView([27.4728, 89.6390], 13); // Hypothetical Bhutan location
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    L.marker([27.475, 89.64])
+        .addTo(map)
+        .bindPopup("<b>Mental Wellbeing Centre</b><br>Counselling & Support");
+
+    L.marker([27.47, 89.635])
+        .addTo(map)
+        .bindPopup("<b>Community Health Clinic</b><br>Mental Health Services");
+
+    L.marker([27.468, 89.645])
+        .addTo(map)
+        .bindPopup("<b>Recreational Park</b><br>Walking & Relaxation");
+
+    L.marker([27.48, 89.63])
+        .addTo(map)
+        .bindPopup("<b>Yoga & Meditation Centre</b>");
+
+    mapInitialized = true;
+}
+</script>
+
+</body>
+</html>
